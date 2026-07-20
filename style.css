@@ -1,0 +1,41 @@
+/* Update these in your <style> tag */
+.catalog-grid { 
+    margin-bottom: 45px; 
+    border-top: 1px solid #333; /* Top line for the list */
+}
+
+.build-card { 
+    background: transparent; /* Remove dark box background */
+    border: none; 
+    border-bottom: 1px solid #333; /* Keeps the line divider */
+    border-radius: 0; 
+    padding: 20px 0; 
+    margin-bottom: 0; 
+}
+
+.card-content { padding: 0; }
+
+.card-tag { 
+    color: #888; /* Gray color for category */
+    font-size: 0.8rem; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    margin-bottom: 5px; 
+    display: block; 
+}
+
+.card-title { 
+    color: var(--accent-gold); 
+    font-family: 'Inter', sans-serif; /* Changed to match your screenshot text style */
+    font-size: 1.2rem; 
+    margin: 5px 0; 
+}
+
+.card-desc { 
+    font-size: 0.95rem; 
+    color: var(--text-main); 
+    margin-bottom: 0; 
+    font-style: normal; 
+}
+
+.btn-card-order { display: none; } /* Hide the button if you want it exactly like the photo */
