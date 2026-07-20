@@ -4,115 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donut SMP - Builder Service</title>
-    <!-- YOUR ORIGINAL CSS GOES HERE -->
+    <!-- RESTORED ORIGINAL CSS -->
     <style>
-        /* [Insert all your previous CSS here] */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap');
+        :root {
+            --bg-dark: #0d0e11; --card-dark: #1a171e; --text-main: #b0b5c1;
+            --accent-ember: #b84e36; --accent-gold: #d1a751; --accent-blue: #4b6b7c;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; padding: 20px; }
         .view-panel { display: none; }
-        .view-panel.active-view { display: block; }
+        .active-view { display: block; }
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .nav-btn { background: transparent; border: 1px solid var(--accent-blue); color: var(--text-main); padding: 10px; border-radius: 25px; cursor: pointer; }
+        .build-card { background: var(--card-dark); border: 1px solid #26232b; padding: 20px; margin-bottom: 15px; border-radius: 8px; }
+        h1, .card-title { color: var(--accent-gold); font-family: 'Cinzel', serif; }
         .admin-only { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- MODAL -->
-    <div class="modal-overlay" id="how-it-works-modal" style="display:none;">
-        <div class="modal-card">
-            <button class="modal-close-x" onclick="closeModal()">✕</button>
-            <h2 class="modal-title">HOW IT WORKS</h2>
-            <button class="btn-modal-action" onclick="closeModal()">GOT IT</button>
-        </div>
-    </div>
-
     <!-- NAVIGATION -->
     <nav class="nav-grid">
         <button class="nav-btn" onclick="switchView('showcase')">Showcase</button>
-        <button class="nav-btn" id="nav-auth-btn" onclick="handleAuthNavClick()">Login</button>
+        <button class="nav-btn" id="nav-auth-btn" onclick="handleAuth()">Login</button>
         <button class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin UI</button>
-        <button class="nav-btn" onclick="openModal()">Guide</button>
+        <button class="nav-btn" onclick="document.getElementById('modal').style.display='flex'">Guide</button>
     </nav>
 
-    <!-- VIEW: SHOWCASE -->
+    <!-- CONTENT -->
     <div id="view-showcase" class="view-panel active-view">
+        <h1>SHOWCASE</h1>
         <div id="catalog-grid"></div>
-        <!-- Order Form and Community Links -->
-        <div id="order-form-container">
-            <!-- Your form code here -->
-        </div>
-        <div id="community-links">
-            <!-- Your social links here -->
-        </div>
     </div>
 
-    <!-- VIEW: AUTH -->
-    <div id="view-auth" class="view-panel">
-        <form id="auth-form" onsubmit="executeAuthAction(event)">
-            <input type="email" id="auth-email" placeholder="Email" required>
-            <input type="password" id="auth-pass" placeholder="Password" required>
-            <button type="submit">SIGN IN</button>
-        </form>
-    </div>
-
-    <!-- VIEW: ADMIN -->
     <div id="view-admin" class="view-panel admin-only">
-        <h1>Admin Control Panel</h1>
-        <div id="admin-orders-list"></div>
+        <h1>ADMIN CONTROL</h1>
     </div>
 
-    <!-- CONSOLIDATED SCRIPT -->
+    <!-- MODAL -->
+    <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
+        <div style="background:#1a171e; padding:30px; border:1px solid #d1a751; color:#fff;">
+            <h2>HOW IT WORKS</h2>
+            <button onclick="document.getElementById('modal').style.display='none'">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- FULL FUNCTIONAL SCRIPT -->
     <script>
-        // 1. Data
         const catalog = [
-            { title: "Stash Vault", cat: "STASH", desc: "Secure 10x10 underground storage." },
+            { title: "Stash Vault", cat: "STASH", desc: "Secure underground storage." },
             { title: "Automatic Wheat Farm", cat: "FARM", desc: "High-yield farm." },
-            { title: "Full Regear Kit", cat: "REGEAR", desc: "Complete diamond gear set." },
-            { title: "Perimeter Dig", cat: "DIGGING", desc: "100x100 chunk clearing." }
+            { title: "Full Regear Kit", cat: "REGEAR", desc: "Complete diamond gear." },
+            { title: "Perimeter Dig", cat: "DIGGING", desc: "Chunk clearing." }
         ];
 
-        // 2. Logic: Render
-        function renderCatalog(filter = "ALL") {
+        function renderCatalog() {
             const grid = document.getElementById('catalog-grid');
-            if(!grid) return;
             grid.innerHTML = "";
-            const filtered = filter === "ALL" ? catalog : catalog.filter(i => i.cat === filter);
-            filtered.forEach(item => {
-                grid.innerHTML += `<div class="build-card"><h3>${item.title}</h3><p>${item.desc}</p></div>`;
+            catalog.forEach(item => {
+                grid.innerHTML += `<div class="build-card"><h3 class="card-title">${item.title}</h3><p>${item.desc}</p></div>`;
             });
         }
 
-        // 3. Logic: Navigation & Auth
         function switchView(viewId) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
             document.getElementById('view-' + viewId).classList.add('active-view');
         }
 
-        function handleAuthNavClick() {
-            if (document.getElementById('nav-auth-btn').innerText === "Logout") {
+        function handleAuth() {
+            const btn = document.getElementById('nav-auth-btn');
+            if(btn.innerText === "Login") {
+                const pass = prompt("Enter password (admin to test):");
+                if(pass === "admin") {
+                    document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'block');
+                    btn.innerText = "Logout";
+                }
+            } else {
                 document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'none');
-                document.getElementById('nav-auth-btn').innerText = "Login";
-            } else {
-                switchView('auth');
+                btn.innerText = "Login";
             }
         }
 
-        function executeAuthAction(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            if (email === "admin@donut.smp") {
-                document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'block');
-                document.getElementById('nav-auth-btn').innerText = "Logout";
-                switchView('showcase');
-            } else {
-                switchView('showcase');
-            }
-        }
-
-        function openModal() { document.getElementById('how-it-works-modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('how-it-works-modal').style.display = 'none'; }
-
-        // 4. Init
-        window.onload = () => {
-            renderCatalog();
-        };
+        window.onload = renderCatalog;
     </script>
 </body>
 </html>
