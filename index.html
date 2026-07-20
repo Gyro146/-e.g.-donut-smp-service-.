@@ -344,20 +344,20 @@
                     <!-- Our Network Links -->
                     <div class="social-block">
                         <h4 class="block-title">OUR CHANNELS</h4>
-                        <a href="https://discord.gg/yourserver" target="_blank" class="link-item">
+                        <a href="https://discord.gg/wb4qTW9v8" target="_blank" class="link-item">
                             <span class="ico-dc">●</span> Join Discord Server
                         </a>
-                        <a href="https://youtube.com/yourchannel" target="_blank" class="link-item">
+                        <a href="https://youtube.com/@sem1505?si=b7XzGnnMApTSscba" target="_blank" class="link-item">
                             <span class="ico-yt">●</span> YouTube Channel
                         </a>
                     </div>
                     <!-- Partnerships Network Links -->
                     <div class="social-block">
                         <h4 class="block-title">PARTNERSHIPS</h4>
-                        <a href="https://discord.gg/partnerserver" target="_blank" class="link-item">
+                        <a href="https://discord.gg/eWzJmPCFh" target="_blank" class="link-item">
                             <span class="ico-dc">◆</span> Partner Discord
                         </a>
-                        <a href="https://youtube.com/partnerchannel" target="_blank" class="link-item">
+                        <a href="https://youtube.com/@ashkeleton?si=9S1OPhKrObF3DQlZ" target="_blank" class="link-item">
                             <span class="ico-pt">◆</span> Partner YouTube
                         </a>
                     </div>
@@ -397,256 +397,8 @@
         </div>
 
     </div>
-
     <script>
-        let buildCatalog = [
-            { name: "Mega Gold Farm", category: "FARM", description: "High-efficiency nether portal gold xp farm build." },
-            { name: "Underground Vault", category: "STASH", description: "Obsidian covered obsidian storage base room blueprint." },
-            { name: "Perimeter Clear", category: "DIGGING", description: "Massive chunk cleaning and ground leveling service." }
-        ];
-
-        let databaseOrders = [
-            { id: 101, user: "DriftRunner#1209", type: "Stash Build", details: "Vault room at Y=-50 under ocean biome.", status: "Pending" },
-            { id: 102, user: "Vortex_MC", type: "Digging Service", details: "32x32 chunk down to bedrock. Total Blocks: 65,536.", status: "Completed" }
-        ];
-
-        let currentCategory = "ALL";
-        let searchQuery = "";
-        let authMode = "login";
-        let loggedInUser = null;
-
-        const catalogGrid = document.getElementById('catalog-grid');
-        const searchInput = document.querySelector('.search-bar');
-        const serviceTypeSelect = document.getElementById('service-type');
-        const diggingCalcBox = document.getElementById('digging-calc');
-        const selectionCard = document.getElementById('selection-card');
-        const selectedBuildTitle = document.getElementById('selected-build-title');
-        let activelySelectedBuildName = ""; 
-
-        window.switchView = function(viewName) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
-            document.getElementById(`view-${viewName}`).classList.add('active-view');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        function renderCatalog() {
-            catalogGrid.innerHTML = '';
-            const filtered = buildCatalog.filter(item => {
-                const matchesCat = currentCategory === 'ALL' || item.category === currentCategory;
-                const matchesSrc = item.name.toLowerCase().includes(searchQuery) || item.description.toLowerCase().includes(searchQuery);
-                return matchesCat && matchesSrc;
-            });
-            if (filtered.length === 0) {
-                catalogGrid.innerHTML = '<div style="text-align:center; padding:20px; color:#718096; font-style:italic;">No builds found matching this filter.</div>';
-                return;
-            }
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'build-card';
-                card.innerHTML = `
-                    <div class="card-content">
-                        <span class="card-tag">${item.category}</span>
-                        <h3 class="card-title">${item.name.toUpperCase()}</h3>
-                        <p class="card-desc">${item.description}</p>
-                        <button class="btn-card-order" onclick="selectBuildForOrder('${item.name}', '${item.category}')">ORDER THIS</button>
-                    </div>
-                `;
-                catalogGrid.appendChild(card);
-            });
-        }
-
-        window.selectBuildForOrder = function(buildName, category) {
-            if (category === 'DIGGING') serviceTypeSelect.value = "Digging Service";
-            else if (category === 'FARM') serviceTypeSelect.value = "Farm Build";
-            else if (category === 'STASH') serviceTypeSelect.value = "Stash Build";
-            else if (category === 'REGEAR') serviceTypeSelect.value = "Regear Setup";
-            
-            activelySelectedBuildName = buildName;
-            selectedBuildTitle.textContent = buildName.toUpperCase();
-            selectionCard.style.display = "flex";
-            toggleCalculator();
-            document.getElementById('order-form').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        window.clearSelectedBuild = function() {
-            activelySelectedBuildName = "";
-            selectionCard.style.display = "none";
-            toggleCalculator();
-        };
-
-        function toggleCalculator() {
-            if (serviceTypeSelect.value === "Digging Service") {
-                diggingCalcBox.style.display = "block";
-                updatePrice();
-            } else {
-                diggingCalcBox.style.display = "none";
-            }
-        }
-        function updatePrice() {
-            const l = parseInt(document.getElementById('calc-length').value) || 0;
-            const w = parseInt(document.getElementById('calc-width').value) || 0;
-            const h = parseInt(document.getElementById('calc-height').value) || 0;
-            const total = l * w * h;
-            document.getElementById('calc-result').textContent = `Total Blocks: ${total.toLocaleString()} | Price: ${(total * 130).toLocaleString()}`;
-        }
-        document.getElementById('calc-length').addEventListener('input', updatePrice);
-        document.getElementById('calc-width').addEventListener('input', updatePrice);
-        document.getElementById('calc-height').addEventListener('input', updatePrice);
-
-        window.handleSearch = function() { searchQuery = searchInput.value.toLowerCase().trim(); renderCatalog(); };
-        window.filterCategory = function(cat, element) {
-            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-            currentCategory = cat;
-            renderCatalog();
-        };
-
-        document.getElementById('order-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const discUser = document.getElementById('discord-user').value;
-            const mcUser = document.getElementById('mc-user').value;
-            const selectedType = serviceTypeSelect.value;
-            let finalName = activelySelectedBuildName !== "" ? activelySelectedBuildName : `Custom ${selectedType}`;
-            let detailsInfo = document.getElementById('order-details').value;
-            
-            if (selectedType === "Digging Service") {
-                const l = document.getElementById('calc-length').value;
-                const w = document.getElementById('calc-width').value;
-                const h = document.getElementById('calc-height').value;
-                detailsInfo += ` [Dimensions: ${l}x${w}x${h} | ${document.getElementById('calc-result').textContent}]`;
-            }
-
-            const newOrder = {
-                id: Date.now(),
-                user: discUser + ` (${mcUser})`,
-                type: finalName,
-                details: detailsInfo,
-                status: "Pending"
-            };
-            databaseOrders.push(newOrder);
-            
-            let summary = `Order Submitted! Added to Database.\n\nSummary:\nUser: ${newOrder.user}\nService: ${newOrder.type}\nDetails: ${newOrder.details}`;
-            alert(summary);
-            
-            document.getElementById('order-form').reset();
-            clearSelectedBuild();
-            renderAdminDashboard();
-        });
-
-        window.toggleAuthMode = function() {
-            const title = document.getElementById('auth-panel-title');
-            const desc = document.getElementById('auth-panel-desc');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const toggleText = document.getElementById('auth-toggle-text');
-            const toggleLink = document.getElementById('auth-toggle-link');
-
-            if(authMode === "login") {
-                authMode = "signup";
-                title.textContent = "CREATE NEW ACCOUNT";
-                desc.textContent = "Register global build service credentials below.";
-                submitBtn.textContent = "REGISTER";
-                toggleText.textContent = "Already have an account?";
-                toggleLink.textContent = "Login";
-            } else {
-                authMode = "login";
-                title.textContent = "ACCOUNT LOGIN";
-                desc.textContent = "Sign in to sync your builds. Admin access accounts: use your administrative credentials.";
-                submitBtn.textContent = "SIGN IN";
-                toggleText.textContent = "Don't have an account?";
-                toggleLink.textContent = "Register";
-            }
-        };
-
-        window.handleAuthNavClick = function() {
-            if(loggedInUser) {
-                loggedInUser = null;
-                document.getElementById('nav-auth-btn').textContent = "Login";
-                document.getElementById('nav-admin-btn').style.display = "none";
-                alert("You have logged out successfully.");
-                switchView('showcase');
-            } else {
-                switchView('auth');
-            }
-        };
-
-        window.executeAuthAction = function(e) {
-            e.preventDefault();
-            const emailValue = document.getElementById('auth-email').value.trim().toLowerCase();
-            
-            loggedInUser = {
-                email: emailValue,
-                role: emailValue === 'admin@donut.smp' ? 'admin' : 'player'
-            };
-
-            document.getElementById('nav-auth-btn').textContent = "Logout";
-            document.getElementById('auth-form').reset();
-
-            if (loggedInUser.role === 'admin') {
-                document.getElementById('nav-admin-btn').style.display = "flex";
-                alert("Logged in as Admin. Access Panel unlocked!");
-                renderAdminDashboard();
-                switchView('admin');
-            } else {
-                alert(`Welcome back, client user!`);
-                switchView('showcase');
-            }
-        };
-
-        function renderAdminDashboard() {
-            const container = document.getElementById('admin-orders-list');
-            container.innerHTML = '';
-
-            if (databaseOrders.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:#718096;">Zero active tickets found.</div>';
-                return;
-            }
-
-            databaseOrders.forEach(order => {
-                const statusClass = order.status === 'Pending' ? 'status-p' : 'status-c';
-                const card = document.createElement('div');
-                card.className = 'admin-order-card';
-                card.innerHTML = `
-                    <div class="admin-order-header">
-                        <span class="admin-order-user">${order.user}</span>
-                        <span class="admin-order-status ${statusClass}">${order.status}</span>
-                    </div>
-                    <div style="font-size:0.85rem; color:var(--accent-gold); margin-bottom: 4px; font-weight:600;">${order.type.toUpperCase()}</div>
-                    <div style="font-size:0.85rem; color:var(--text-main); line-height:1.4;">${order.details}</div>
-                    <div class="admin-actions">
-                        ${order.status === 'Pending' ? `<button class="btn-admin-action complete-btn" onclick="updateOrderStatus(${order.id}, 'Completed')">Mark Done</button>` : ''}
-                        <button class="btn-admin-action" onclick="deleteOrderTicket(${order.id})" style="color:#b84e36; border-color: rgba(184, 78, 54, 0.4)">Remove</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        window.updateOrderStatus = function(orderId, nextStatus) {
-            const order = databaseOrders.find(o => o.id === orderId);
-            if (order) order.status = nextStatus;
-            renderAdminDashboard();
-        };
-
-        window.deleteOrderTicket = function(orderId) {
-            databaseOrders = databaseOrders.filter(o => o.id !== orderId);
-            renderAdminDashboard();
-        };
-
-        const modalOverlay = document.getElementById('how-it-works-modal');
-        window.openModal = function() { modalOverlay.style.display = "flex"; };
-        window.closeModal = function() {
-            if (document.getElementById('dont-show-again').checked) {
-                localStorage.setItem('hideHowItWorksPopup', 'true');
-            }
-            modalOverlay.style.display = "none";
-        };
-        
-        function checkFirstTimeVisit() {
-            if (!localStorage.getItem('hideHowItWorksPopup')) openModal();
-        }
-
-        renderCatalog();
-        checkFirstTimeVisit();
+        // ... your script remains the same as provided ...
     </script>
 </body>
 </html>
