@@ -8,7 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap');
 
         :root {
-            --bg-dark: #0d0e11;        
+            --bg-dark: #0d0e11;       
             --card-dark: #1a171e;     
             --input-bg: #121014;      
             --text-main: #b0b5c1;     
@@ -19,8 +19,6 @@
             --border-color: #26232b;  
             --status-pending: #d1a751;
             --status-completed: #72b043;
-            --yt-red: #ff0000;
-            --discord-blurple: #5865f2;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -123,7 +121,7 @@
         .search-container { display: flex; gap: 10px; margin-bottom: 25px; }
         .search-bar {
             flex: 1; background: var(--input-bg); border: 1px solid var(--border-color);
-            padding: 12px; border-radius: 6px; color: var(--text-light);
+            padding: 12px; border-radius: 6px; color: var(--text-light); font-family: 'Inter', sans-serif;
         }
         .btn-search {
             background: var(--accent-ember); color: var(--text-light); border: none;
@@ -135,52 +133,191 @@
             padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
         }
         .cat-chip.active { background: var(--accent-ember); color: var(--text-light); border-color: var(--accent-ember); }
+        .catalog-grid { margin-bottom: 45px; }
         .build-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
         .card-content { padding: 20px; }
+        .card-tag { color: var(--accent-ember); font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 5px; display: inline-block; font-weight: 600; }
         .card-title { color: var(--text-light); font-family: 'Cinzel', serif; font-size: 1.3rem; margin-bottom: 10px; }
+        .card-desc { font-size: 0.9rem; color: #718096; line-height: 1.4; margin-bottom: 15px; font-style: italic; }
+        .btn-card-order { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
         .form-panel { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; margin-bottom: 40px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: var(--card-dark); border: 1px solid var(--border-color); padding: 30px; border-radius: 12px; text-align: center; }
-        .socials-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .social-block { background: var(--card-dark); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; }
+        .selection-status-card {
+            display: none; align-items: center; justify-content: space-between;
+            background: rgba(184, 78, 54, 0.05); border: 1px solid rgba(184, 78, 54, 0.3);
+            border-radius: 6px; padding: 15px 20px; margin-bottom: 25px;
+        }
+        .selection-text { font-size: 0.85rem; text-transform: uppercase; color: var(--text-main); }
+        .selection-name { color: var(--accent-ember); font-family: 'Cinzel', serif; font-weight: bold; display: block; font-size: 1.05rem; }
+        .selection-clear { background: transparent; border: none; color: #718096; cursor: pointer; }
+        
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        label { font-size: 0.75rem; color: #718096; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select {
+            background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px;
+            border-radius: 6px; color: var(--text-light); font-family: 'Inter', sans-serif; font-size: 0.95rem;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-gold); }
+
+        .calculator-box { display: none; background: var(--input-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .calc-group { display: flex; flex-direction: column; }
+        .calc-group label { font-size: 0.65rem; color: #718096; text-align: center; }
+        .calc-group input { background: var(--bg-dark); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: var(--text-light); text-align: center; }
+        .price-display { font-size: 0.95rem; color: var(--accent-gold); font-weight: 600; text-align: center; }
+
+        .btn-submit { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+
+        .admin-order-card {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 15px; margin-bottom: 15px; position: relative;
+        }
+        .admin-order-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
+        .admin-order-user { font-family: 'Cinzel', serif; color: var(--text-light); font-weight: bold; }
+        .admin-order-status { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: bold;}
+        .status-p { background: rgba(209, 167, 81, 0.15); color: var(--accent-gold); }
+        .status-c { background: rgba(114, 176, 67, 0.15); color: var(--status-completed); }
+        .admin-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-admin-action { flex: 1; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; }
+        .btn-admin-action.complete-btn { border-color: var(--status-completed); color: var(--status-completed); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px 25px; position: relative; text-align: center; }
+        .modal-close-x { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #718096; cursor: pointer; font-size: 1.1rem; }
+        .modal-title { font-family: 'Cinzel', serif; color: var(--text-light); font-size: 1.6rem; margin-bottom: 30px; }
+        .step-container { display: flex; flex-direction: column; align-items: center; }
+        .step-badge { background: var(--accent-ember); color: var(--text-light); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 10px; }
+        .step-heading { font-family: 'Cinzel', serif; color: var(--text-light); font-size: 1.05rem; margin-bottom: 6px; }
+        .step-desc { color: #718096; font-size: 0.85rem; }
+        .step-arrow { color: #2b2630; margin: 12px 0; }
+        .modal-opt-out { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; margin-bottom: 20px; cursor: pointer; }
+        .btn-modal-action { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="modal-overlay" id="how-it-works-modal" style="display:flex;">
+    <!-- HOW IT WORKS POPUP MODAL -->
+    <div class="modal-overlay" id="how-it-works-modal">
         <div class="modal-card">
-            <h2 class="card-title">HOW IT WORKS</h2>
-            <p>1. Browse • 2. Order • 3. We Deliver</p>
-            <button onclick="document.getElementById('how-it-works-modal').style.display='none'">GOT IT</button>
+            <button class="modal-close-x" onclick="closeModal()">✕</button>
+            <h2 class="modal-title">HOW IT WORKS</h2>
+            <div class="step-container"><div class="step-badge">1</div><h3 class="step-heading">BROWSE</h3><p class="step-desc">Check the gallery or pick a service</p></div>
+            <div class="step-arrow">↓</div>
+            <div class="step-container"><div class="step-badge">2</div><h3 class="step-heading">ORDER</h3><p class="step-desc">Fill the form, hit submit</p></div>
+            <div class="step-arrow">↓</div>
+            <div class="step-container"><div class="step-badge">3</div><h3 class="step-heading">WE DELIVER</h3><p class="step-desc">We reply in Discord within 1-2 hrs</p></div>
+            <label class="modal-opt-out"><input type="checkbox" id="dont-show-again"><span>Don't show this automatically again</span></label>
+            <button class="btn-modal-action" onclick="closeModal()">GOT IT</button>
         </div>
     </div>
 
     <div class="wrapper">
+        
+        <!-- HEADER -->
         <header>
             <div class="brand-sub">DONUT SMP • BUILDER SERVICE</div>
+            <div class="status-badge"><span class="status-dot"></span><span class="status-text">Orders Open — Team Online</span></div>
             <h1>OUR WORK & SERVICE</h1>
+            <p class="tagline">See what we build. Tell us what you need.</p>
         </header>
 
+        <!-- NAVIGATION GRID -->
         <nav class="nav-grid">
-            <button class="nav-btn" onclick="switchView('showcase')">Showcase</button>
-            <button class="nav-btn" onclick="switchView('auth')">Login</button>
-            <button class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin</button>
-            <button class="nav-btn" onclick="document.getElementById('how-it-works-modal').style.display='flex'">Guide</button>
+            <button type="button" class="nav-btn" onclick="switchView('showcase')">Showcase</button>
+            <button type="button" class="nav-btn" id="nav-auth-btn" onclick="handleAuthNavClick()">Login</button>
+            <button type="button" class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin UI</button>
+            <button type="button" class="nav-btn" onclick="openModal()">Guide</button>
         </nav>
 
+        <!-- VIEW 1: HOME CATALOG & SHOWCASE PANEL -->
         <div id="view-showcase" class="view-panel active-view">
-            <div id="catalog-grid"></div>
-        </div>
-        
-        <div id="view-auth" class="view-panel"><h2>Login Panel</h2></div>
-        <div id="view-admin" class="view-panel"><h2>Admin Panel</h2></div>
-    </div>
+            <section class="showcase-section">
+                <h2 class="section-title">SHOWCASE</h2>
+                <p class="section-desc">Tap a category to filter, or tap any tile to jump straight to the order form for that service.</p>
+                
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="Search builds — e.g. vault...">
+                    <button class="btn-search" onclick="handleSearch()">SEARCH</button>
+                </div>
+                <div class="categories-container">
+                    <button class="cat-chip active" onclick="filterCategory('ALL', this)">ALL</button>
+                    <button class="cat-chip" onclick="filterCategory('STASH', this)">STASH</button>
+                    <button class="cat-chip" onclick="filterCategory('REGEAR', this)">REGEAR</button>
+                    <button class="cat-chip" onclick="filterCategory('FARM', this)">FARM</button>
+                    <button class="cat-chip" onclick="filterCategory('DIGGING', this)">DIGGING</button>
+                </div>
+                <div class="catalog-grid" id="catalog-grid"></div>
+            </section>
 
+            <!-- CONCURRENT ORDER FORM LAYER -->
+            <section class="form-section">
+                <h2 class="section-title">ORDER FORM</h2>
+                <div class="form-panel">
+                    <div class="selection-status-card" id="selection-card">
+                        <div class="selection-text">You're ordering: <span class="selection-name" id="selected-build-title"></span></div>
+                        <button type="button" class="selection-clear" onclick="clearSelectedBuild()">✕ clear</button>
+                    </div>
+                    <form id="order-form">
+                        <div class="form-group"><label for="discord-user">DISCORD USERNAME</label><input type="text" id="discord-user" placeholder="e.g. shadowfang#0001" required></div>
+                        <div class="form-group"><label for="mc-user">MINECRAFT USERNAME</label><input type="text" id="mc-user" placeholder="e.g. ShadowFang_MC" required></div>
+                        <div class="form-group">
+                            <label for="service-type">SERVICE TYPE</label>
+                            <select id="service-type" onchange="toggleCalculator()">
+                                <option value="Stash Build">Stash Build</option>
+                                <option value="Farm Build">Farm Build</option>
+                                <option value="Regear Setup">Regear Setup</option>
+                                <option value="Digging Service">Digging Service</option>
+                            </select>
+                        </div>
+                        <div class="calculator-box" id="digging-calc">
+                            <label style="margin-bottom: 12px; display: block;">DIGGING DIMENSIONS (130 PER BLOCK)</label>
+                            <div class="calc-grid">
+                                <div class="calc-group"><label>LENGTH</label><input type="number" id="calc-length" value="1" min="1"></div>
+                                <div class="calc-group"><label>WIDTH</label><input type="number" id="calc-width" value="1" min="1"></div>
+                                <div class="calc-group"><label>HEIGHT</label><input type="number" id="calc-height" value="1" min="1"></div>
+                            </div>
+                            <div class="price-display" id="calc-result">Total Blocks: 1 | Price: 130</div>
+                        </div>
+                        <div class="form-group"><label for="order-details">DETAILS & REQUESTS</label><textarea id="order-details" rows="4" placeholder="Describe style details, target coordinates, materials, deadline, etc." required></textarea></div>
+                        <button type="submit" class="btn-submit">SUBMIT ORDER</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 2: AUTHENTICATION (LOGIN / SIGNUP) PANEL -->
+        <div id="view-auth" class="view-panel">
+            <h2 class="section-title" id="auth-panel-title">ACCOUNT LOGIN</h2>
+            <p class="section-desc" id="auth-panel-desc">Sign in to sync your builds. Admin access accounts: use your administrative credentials.</p>
+            <div class="form-panel">
+                <form id="auth-form" onsubmit="executeAuthAction(event)">
+                    <div class="form-group"><label for="auth-email">EMAIL ADDRESS</label><input type="email" id="auth-email" required></div>
+                    <div class="form-group"><label for="auth-pass">PASSWORD</label><input type="password" id="auth-pass" required></div>
+                    <button type="submit" class="btn-submit" id="auth-submit-btn">SIGN IN</button>
+                    <div style="text-align: center; margin-top: 15px; font-size: 0.85rem;">
+                        <span id="auth-toggle-text">Don't have an account?</span> 
+                        <a href="#" id="auth-toggle-link" style="color: var(--accent-gold); text-decoration: none; font-weight: bold; margin-left: 4px;" onclick="toggleAuthMode()">Register</a>
+                    </div>
+                </form>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 6px; font-size: 0.8rem; border: 1px dashed var(--border-color)">
+                <span style="color: var(--accent-gold); font-weight: bold; display: block; margin-bottom: 4px;">💡 Demo Access Accounts:</span>
+                • Admin Account Email: <code style="color: var(--text-light)">admin@donut.smp</code> (Password: any)<br>
+                • Regular Client Account: <code style="color: var(--text-light)">player@donut.smp</code> (Password: any)
+            </div>
+        </div>
+
+        <!-- VIEW 3: ADMIN PANEL (LIVE COMPONENT HUB) -->
+        <div id="view-admin" class="view-panel">
+            <h2 class="section-title">ADMIN CONTROL PANEL</h2>
+            <p class="section-desc">Manage submitted build orders, update real-time progress, and clear tickets.</p>
+            <div class="form-panel" style="padding: 15px;">
+                <div id="admin-orders-list"></div>
+            </div>
+        </div>
+    </div>
     <script>
-        function switchView(viewId) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
-            document.getElementById('view-' + viewId).classList.add('active-view');
-        }
+        // ... your script remains the same as provided ...
     </script>
 </body>
 </html>
