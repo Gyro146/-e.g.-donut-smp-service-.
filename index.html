@@ -4,88 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donut SMP - Builder Service</title>
-    <!-- RESTORED ORIGINAL CSS -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap');
+
         :root {
-            --bg-dark: #0d0e11; --card-dark: #1a171e; --text-main: #b0b5c1;
-            --accent-ember: #b84e36; --accent-gold: #d1a751; --accent-blue: #4b6b7c;
+            --bg-dark: #0d0e11;        
+            --card-dark: #1a171e;     
+            --input-bg: #121014;      
+            --text-main: #b0b5c1;     
+            --text-light: #e2e8f0;    
+            --accent-ember: #b84e36;  
+            --accent-gold: #d1a751;   
+            --accent-blue: #4b6b7c;   
+            --border-color: #26232b;  
+            --status-pending: #d1a751;
+            --status-completed: #72b043;
+            --yt-red: #ff0000;
+            --discord-blurple: #5865f2;
         }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; padding: 20px; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrapper { width: 100%; max-width: 600px; }
+
+        header { text-align: center; margin-top: 20px; margin-bottom: 40px; }
+
+        .brand-sub {
+            color: var(--accent-ember);
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(75, 107, 124, 0.1);
+            border: 1px solid var(--accent-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .status-dot { width: 8px; height: 8px; background-color: #72b043; border-radius: 50%; }
+
+        h1 {
+            color: var(--accent-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .tagline { font-style: italic; color: #718096; font-size: 0.95rem; }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--text-light);
+            padding: 10px 4px;
+            border-radius: 25px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn.admin-only {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            display: none;
+        }
+
         .view-panel { display: none; }
-        .active-view { display: block; }
-        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .nav-btn { background: transparent; border: 1px solid var(--accent-blue); color: var(--text-main); padding: 10px; border-radius: 25px; cursor: pointer; }
-        .build-card { background: var(--card-dark); border: 1px solid #26232b; padding: 20px; margin-bottom: 15px; border-radius: 8px; }
-        h1, .card-title { color: var(--accent-gold); font-family: 'Cinzel', serif; }
-        .admin-only { display: none; }
+        .view-panel.active-view { display: block; }
+
+        .section-title {
+            color: var(--text-light);
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before { content: "◆"; color: var(--accent-ember); font-size: 0.9rem; }
+        .section-desc { font-size: 0.9rem; color: #718096; margin-bottom: 20px; line-height: 1.5; }
+
+        .search-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .search-bar {
+            flex: 1; background: var(--input-bg); border: 1px solid var(--border-color);
+            padding: 12px; border-radius: 6px; color: var(--text-light);
+        }
+        .btn-search {
+            background: var(--accent-ember); color: var(--text-light); border: none;
+            padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+        .categories-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+        .cat-chip {
+            background: rgba(26, 23, 30, 0.6); border: 1px solid var(--border-color); color: #718096;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .cat-chip.active { background: var(--accent-ember); color: var(--text-light); border-color: var(--accent-ember); }
+        .build-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .card-content { padding: 20px; }
+        .card-title { color: var(--text-light); font-family: 'Cinzel', serif; font-size: 1.3rem; margin-bottom: 10px; }
+        .form-panel { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; margin-bottom: 40px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-card { background: var(--card-dark); border: 1px solid var(--border-color); padding: 30px; border-radius: 12px; text-align: center; }
+        .socials-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .social-block { background: var(--card-dark); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- NAVIGATION -->
-    <nav class="nav-grid">
-        <button class="nav-btn" onclick="switchView('showcase')">Showcase</button>
-        <button class="nav-btn" id="nav-auth-btn" onclick="handleAuth()">Login</button>
-        <button class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin UI</button>
-        <button class="nav-btn" onclick="document.getElementById('modal').style.display='flex'">Guide</button>
-    </nav>
-
-    <!-- CONTENT -->
-    <div id="view-showcase" class="view-panel active-view">
-        <h1>SHOWCASE</h1>
-        <div id="catalog-grid"></div>
-    </div>
-
-    <div id="view-admin" class="view-panel admin-only">
-        <h1>ADMIN CONTROL</h1>
-    </div>
-
-    <!-- MODAL -->
-    <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
-        <div style="background:#1a171e; padding:30px; border:1px solid #d1a751; color:#fff;">
-            <h2>HOW IT WORKS</h2>
-            <button onclick="document.getElementById('modal').style.display='none'">CLOSE</button>
+    <div class="modal-overlay" id="how-it-works-modal" style="display:flex;">
+        <div class="modal-card">
+            <h2 class="card-title">HOW IT WORKS</h2>
+            <p>1. Browse • 2. Order • 3. We Deliver</p>
+            <button onclick="document.getElementById('how-it-works-modal').style.display='none'">GOT IT</button>
         </div>
     </div>
 
-    <!-- FULL FUNCTIONAL SCRIPT -->
+    <div class="wrapper">
+        <header>
+            <div class="brand-sub">DONUT SMP • BUILDER SERVICE</div>
+            <h1>OUR WORK & SERVICE</h1>
+        </header>
+
+        <nav class="nav-grid">
+            <button class="nav-btn" onclick="switchView('showcase')">Showcase</button>
+            <button class="nav-btn" onclick="switchView('auth')">Login</button>
+            <button class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin</button>
+            <button class="nav-btn" onclick="document.getElementById('how-it-works-modal').style.display='flex'">Guide</button>
+        </nav>
+
+        <div id="view-showcase" class="view-panel active-view">
+            <div id="catalog-grid"></div>
+        </div>
+        
+        <div id="view-auth" class="view-panel"><h2>Login Panel</h2></div>
+        <div id="view-admin" class="view-panel"><h2>Admin Panel</h2></div>
+    </div>
+
     <script>
-        const catalog = [
-            { title: "Stash Vault", cat: "STASH", desc: "Secure underground storage." },
-            { title: "Automatic Wheat Farm", cat: "FARM", desc: "High-yield farm." },
-            { title: "Full Regear Kit", cat: "REGEAR", desc: "Complete diamond gear." },
-            { title: "Perimeter Dig", cat: "DIGGING", desc: "Chunk clearing." }
-        ];
-
-        function renderCatalog() {
-            const grid = document.getElementById('catalog-grid');
-            grid.innerHTML = "";
-            catalog.forEach(item => {
-                grid.innerHTML += `<div class="build-card"><h3 class="card-title">${item.title}</h3><p>${item.desc}</p></div>`;
-            });
-        }
-
         function switchView(viewId) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
             document.getElementById('view-' + viewId).classList.add('active-view');
         }
-
-        function handleAuth() {
-            const btn = document.getElementById('nav-auth-btn');
-            if(btn.innerText === "Login") {
-                const pass = prompt("Enter password (admin to test):");
-                if(pass === "admin") {
-                    document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'block');
-                    btn.innerText = "Logout";
-                }
-            } else {
-                document.querySelectorAll('.admin-only').forEach(e => e.style.display = 'none');
-                btn.innerText = "Login";
-            }
-        }
-
-        window.onload = renderCatalog;
     </script>
 </body>
 </html>
