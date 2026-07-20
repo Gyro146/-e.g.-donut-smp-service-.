@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donut SMP - Builder Service</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --bg-dark: #0d0e11;       
+            --card-dark: #1a171e;     
+            --input-bg: #121014;      
+            --text-main: #b0b5c1;     
+            --text-light: #e2e8f0;    
+            --accent-ember: #b84e36;  
+            --accent-gold: #d1a751;   
+            --accent-blue: #4b6b7c;   
+            --border-color: #26232b;  
+            --status-pending: #d1a751;
+            --status-completed: #72b043;
+            --yt-red: #ff0000;
+            --discord-blurple: #5865f2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrapper { width: 100%; max-width: 600px; }
+
+        header { text-align: center; margin-top: 20px; margin-bottom: 40px; }
+
+        .brand-sub {
+            color: var(--accent-ember);
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(75, 107, 124, 0.1);
+            border: 1px solid var(--accent-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .status-dot { width: 8px; height: 8px; background-color: #72b043; border-radius: 50%; }
+
+        h1 {
+            color: var(--accent-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .tagline { font-style: italic; color: #718096; font-size: 0.95rem; }
+
+        /* Navigation Grid */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--text-light);
+            padding: 10px 4px;
+            border-radius: 25px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn.admin-only {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            display: none;
+        }
+
+        /* View Panels Visibility */
+        .view-panel { display: none; }
+        .view-panel.active-view { display: block; }
+
+        .section-title {
+            color: var(--text-light);
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before { content: "◆"; color: var(--accent-ember); font-size: 0.9rem; }
+        .section-desc { font-size: 0.9rem; color: #718096; margin-bottom: 20px; line-height: 1.5; }
+
+        /* Showcase Cards */
+        .search-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .search-bar {
+            flex: 1; background: var(--input-bg); border: 1px solid var(--border-color);
+            padding: 12px; border-radius: 6px; color: var(--text-light); font-family: 'Inter', sans-serif;
+        }
+        .btn-search {
+            background: var(--accent-ember); color: var(--text-light); border: none;
+            padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+        .categories-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+        .cat-chip {
+            background: rgba(26, 23, 30, 0.6); border: 1px solid var(--border-color); color: #718096;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .cat-chip.active { background: var(--accent-ember); color: var(--text-light); border-color: var(--accent-ember); }
+        .catalog-grid { margin-bottom: 45px; }
+        .build-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .card-content { padding: 20px; }
+        .card-tag { color: var(--accent-ember); font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 5px; display: inline-block; font-weight: 600; }
+        .card-title { color: var(--text-light); font-family: 'Cinzel', serif; font-size: 1.3rem; margin-bottom: 10px; }
+        .card-desc { font-size: 0.9rem; color: #718096; line-height: 1.4; margin-bottom: 15px; font-style: italic; }
+        .btn-card-order { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* Panels Shared Forms */
+        .form-panel { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; margin-bottom: 40px; }
+        .selection-status-card {
+            display: none; align-items: center; justify-content: space-between;
+            background: rgba(184, 78, 54, 0.05); border: 1px solid rgba(184, 78, 54, 0.3);
+            border-radius: 6px; padding: 15px 20px; margin-bottom: 25px;
+        }
+        .selection-text { font-size: 0.85rem; text-transform: uppercase; color: var(--text-main); }
+        .selection-name { color: var(--accent-ember); font-family: 'Cinzel', serif; font-weight: bold; display: block; font-size: 1.05rem; }
+        .selection-clear { background: transparent; border: none; color: #718096; cursor: pointer; }
+        
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        label { font-size: 0.75rem; color: #718096; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select {
+            background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px;
+            border-radius: 6px; color: var(--text-light); font-family: 'Inter', sans-serif; font-size: 0.95rem;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-gold); }
+
+        /* Digging Calculator Box */
+        .calculator-box { display: none; background: var(--input-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .calc-group { display: flex; flex-direction: column; }
+        .calc-group label { font-size: 0.65rem; color: #718096; text-align: center; }
+        .calc-group input { background: var(--bg-dark); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: var(--text-light); text-align: center; }
+        .price-display { font-size: 0.95rem; color: var(--accent-gold); font-weight: 600; text-align: center; }
+
+        .btn-submit { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+
+        /* Admin Management List View */
+        .admin-order-card {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 15px; margin-bottom: 15px; position: relative;
+        }
+        .admin-order-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
+        .admin-order-user { font-family: 'Cinzel', serif; color: var(--text-light); font-weight: bold; }
+        .admin-order-status { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: bold;}
+        .status-p { background: rgba(209, 167, 81, 0.15); color: var(--accent-gold); }
+        .status-c { background: rgba(114, 176, 67, 0.15); color: var(--status-completed); }
+        .admin-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-admin-action { flex: 1; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; }
+        .btn-admin-action.complete-btn { border-color: var(--status-completed); color: var(--status-completed); }
+
+        /* Modal Overlay Window */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px 25px; position: relative; text-align: center; }
+        .modal-close-x { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #718096; cursor: pointer; font-size: 1.1rem; }
+        .modal-title { font-family: 'Cinzel', serif; color: var(--text-light); font-size: 1.6rem; margin-bottom: 30px; }
+        .step-container { display: flex; flex-direction: column; align-items: center; }
+        .step-badge { background: var(--accent-ember); color: var(--text-light); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 10px; }
+        .step-heading { font-family: 'Cinzel', serif; color: var(--text-light); font-size: 1.05rem; margin-bottom: 6px; }
+        .step-desc { color: #718096; font-size: 0.85rem; }
+        .step-arrow { color: #2b2630; margin: 12px 0; }
+        .modal-opt-out { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; margin-bottom: 20px; cursor: pointer; }
+        .btn-modal-action { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+
+        /* SOCIAL & PARTNERSHIP HUES PANEL */
+        .socials-footer {
+            margin-top: 20px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .social-block {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .block-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding-bottom: 6px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+        
+        .link-item:last-child { margin-bottom: 0; }
+        .link-item:hover { color: var(--text-light); }
+
+        .ico-dc { color: var(--discord-blurple); font-weight: bold; }
+        .ico-yt { color: var(--yt-red); font-weight: bold; }
+        .ico-pt { color: var(--accent-gold); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- HOW IT WORKS POPUP MODAL -->
+    <div class="modal-overlay" id="how-it-works-modal">
+        <div class="modal-card">
+            <button class="modal-close-x" onclick="closeModal()">✕</button>
+            <h2 class="modal-title">HOW IT WORKS</h2>
+            <div class="step-container"><div class="step-badge">1</div><h3 class="step-heading">BROWSE</h3><p class="step-desc">Check the gallery or pick a service</p></div>
+            <div class="step-arrow">↓</div>
+            <div class="step-container"><div class="step-badge">2</div><h3 class="step-heading">ORDER</h3><p class="step-desc">Fill the form, hit submit</p></div>
+            <div class="step-arrow">↓</div>
+            <div class="step-container"><div class="step-badge">3</div><h3 class="step-heading">WE DELIVER</h3><p class="step-desc">We reply in Discord within 1-2 hrs</p></div>
+            <label class="modal-opt-out"><input type="checkbox" id="dont-show-again"><span>Don't show this automatically again</span></label>
+            <button class="btn-modal-action" onclick="closeModal()">GOT IT</button>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="brand-sub">DONUT SMP • BUILDER SERVICE</div>
+            <div class="status-badge"><span class="status-dot"></span><span class="status-text">Orders Open — Team Online</span></div>
+            <h1>OUR WORK & SERVICE</h1>
+            <p class="tagline">See what we build. Tell us what you need.</p>
+        </header>
+
+        <!-- NAVIGATION GRID -->
+        <nav class="nav-grid">
+            <button type="button" class="nav-btn" onclick="switchView('showcase')">Showcase</button>
+            <button type="button" class="nav-btn" id="nav-auth-btn" onclick="handleAuthNavClick()">Login</button>
+            <button type="button" class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin UI</button>
+            <button type="button" class="nav-btn" onclick="openModal()">Guide</button>
+        </nav>
+
+        <!-- VIEW 1: HOME CATALOG & SHOWCASE PANEL -->
+        <div id="view-showcase" class="view-panel active-view">
+            <section class="showcase-section">
+                <h2 class="section-title">SHOWCASE</h2>
+                <p class="section-desc">Tap a category to filter, or tap any tile to jump straight to the order form for that service.</p>
+                
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="Search builds — e.g. vault...">
+                    <button class="btn-search" onclick="handleSearch()">SEARCH</button>
+                </div>
+                <div class="categories-container">
+                    <button class="cat-chip active" onclick="filterCategory('ALL', this)">ALL</button>
+                    <button class="cat-chip" onclick="filterCategory('STASH', this)">STASH</button>
+                    <button class="cat-chip" onclick="filterCategory('REGEAR', this)">REGEAR</button>
+                    <button class="cat-chip" onclick="filterCategory('FARM', this)">FARM</button>
+                    <button class="cat-chip" onclick="filterCategory('DIGGING', this)">DIGGING</button>
+                </div>
+                <div class="catalog-grid" id="catalog-grid"></div>
+            </section>
+
+            <!-- CONCURRENT ORDER FORM LAYER -->
+            <section class="form-section">
+                <h2 class="section-title">ORDER FORM</h2>
+                <div class="form-panel">
+                    <div class="selection-status-card" id="selection-card">
+                        <div class="selection-text">You're ordering: <span class="selection-name" id="selected-build-title"></span></div>
+                        <button type="button" class="selection-clear" onclick="clearSelectedBuild()">✕ clear</button>
+                    </div>
+                    <form id="order-form">
+                        <div class="form-group"><label for="discord-user">DISCORD USERNAME</label><input type="text" id="discord-user" placeholder="e.g. shadowfang#0001" required></div>
+                        <div class="form-group"><label for="mc-user">MINECRAFT USERNAME</label><input type="text" id="mc-user" placeholder="e.g. ShadowFang_MC" required></div>
+                        <div class="form-group">
+                            <label for="service-type">SERVICE TYPE</label>
+                            <select id="service-type" onchange="toggleCalculator()">
+                                <option value="Stash Build">Stash Build</option>
+                                <option value="Farm Build">Farm Build</option>
+                                <option value="Regear Setup">Regear Setup</option>
+                                <option value="Digging Service">Digging Service</option>
+                            </select>
+                        </div>
+                        <div class="calculator-box" id="digging-calc">
+                            <label style="margin-bottom: 12px; display: block;">DIGGING DIMENSIONS (130 PER BLOCK)</label>
+                            <div class="calc-grid">
+                                <div class="calc-group"><label>LENGTH</label><input type="number" id="calc-length" value="1" min="1"></div>
+                                <div class="calc-group"><label>WIDTH</label><input type="number" id="calc-width" value="1" min="1"></div>
+                                <div class="calc-group"><label>HEIGHT</label><input type="number" id="calc-height" value="1" min="1"></div>
+                            </div>
+                            <div class="price-display" id="calc-result">Total Blocks: 1 | Price: 130</div>
+                        </div>
+                        <div class="form-group"><label for="order-details">DETAILS & REQUESTS</label><textarea id="order-details" rows="4" placeholder="Describe style details, target coordinates, materials, deadline, etc." required></textarea></div>
+                        <button type="submit" class="btn-submit">SUBMIT ORDER</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- COMMUNITY CHANNELS & SOCIAL PARTNERS SECTION -->
+            <section class="socials-section">
+                <h2 class="section-title">COMMUNITY LINKS</h2>
+                <div class="socials-footer">
+                    <!-- Our Network Links -->
+                    <div class="social-block">
+                        <h4 class="block-title">OUR CHANNELS</h4>
+                        <a href="https://discord.gg/yourserver" target="_blank" class="link-item">
+                            <span class="ico-dc">●</span> Join Discord Server
+                        </a>
+                        <a href="https://youtube.com/yourchannel" target="_blank" class="link-item">
+                            <span class="ico-yt">●</span> YouTube Channel
+                        </a>
+                    </div>
+                    <!-- Partnerships Network Links -->
+                    <div class="social-block">
+                        <h4 class="block-title">PARTNERSHIPS</h4>
+                        <a href="https://discord.gg/partnerserver" target="_blank" class="link-item">
+                            <span class="ico-dc">◆</span> Partner Discord
+                        </a>
+                        <a href="https://youtube.com/partnerchannel" target="_blank" class="link-item">
+                            <span class="ico-pt">◆</span> Partner YouTube
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 2: AUTHENTICATION (LOGIN / SIGNUP) PANEL -->
+        <div id="view-auth" class="view-panel">
+            <h2 class="section-title" id="auth-panel-title">ACCOUNT LOGIN</h2>
+            <p class="section-desc" id="auth-panel-desc">Sign in to sync your builds. Admin access accounts: use your administrative credentials.</p>
+            <div class="form-panel">
+                <form id="auth-form" onsubmit="executeAuthAction(event)">
+                    <div class="form-group"><label for="auth-email">EMAIL ADDRESS</label><input type="email" id="auth-email" required></div>
+                    <div class="form-group"><label for="auth-pass">PASSWORD</label><input type="password" id="auth-pass" required></div>
+                    <button type="submit" class="btn-submit" id="auth-submit-btn">SIGN IN</button>
+                    <div style="text-align: center; margin-top: 15px; font-size: 0.85rem;">
+                        <span id="auth-toggle-text">Don't have an account?</span> 
+                        <a href="#" id="auth-toggle-link" style="color: var(--accent-gold); text-decoration: none; font-weight: bold; margin-left: 4px;" onclick="toggleAuthMode()">Register</a>
+                    </div>
+                </form>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 6px; font-size: 0.8rem; border: 1px dashed var(--border-color)">
+                <span style="color: var(--accent-gold); font-weight: bold; display: block; margin-bottom: 4px;">💡 Demo Access Accounts:</span>
+                • Admin Account Email: <code style="color: var(--text-light)">admin@donut.smp</code> (Password: any)<br>
+                • Regular Client Account: <code style="color: var(--text-light)">player@donut.smp</code> (Password: any)
+            </div>
+        </div>
+
+        <!-- VIEW 3: ADMIN PANEL (LIVE COMPONENT HUB) -->
+        <div id="view-admin" class="view-panel">
+            <h2 class="section-title">ADMIN CONTROL PANEL</h2>
+            <p class="section-desc">Manage submitted build orders, update real-time progress, and clear tickets.</p>
+            <div class="form-panel" style="padding: 15px;">
+                <div id="admin-orders-list"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let buildCatalog = [
+            { name: "Mega Gold Farm", category: "FARM", description: "High-efficiency nether portal gold xp farm build." },
+            { name: "Underground Vault", category: "STASH", description: "Obsidian covered obsidian storage base room blueprint." },
+            { name: "Perimeter Clear", category: "DIGGING", description: "Massive chunk cleaning and ground leveling service." }
+        ];
+
+        let databaseOrders = [
+            { id: 101, user: "DriftRunner#1209", type: "Stash Build", details: "Vault room at Y=-50 under ocean biome.", status: "Pending" },
+            { id: 102, user: "Vortex_MC", type: "Digging Service", details: "32x32 chunk down to bedrock. Total Blocks: 65,536.", status: "Completed" }
+        ];
+
+        let currentCategory = "ALL";
+        let searchQuery = "";
+        let authMode = "login";
+        let loggedInUser = null;
+
+        const catalogGrid = document.getElementById('catalog-grid');
+        const searchInput = document.querySelector('.search-bar');
+        const serviceTypeSelect = document.getElementById('service-type');
+        const diggingCalcBox = document.getElementById('digging-calc');
+        const selectionCard = document.getElementById('selection-card');
+        const selectedBuildTitle = document.getElementById('selected-build-title');
+        let activelySelectedBuildName = ""; 
+
+        window.switchView = function(viewName) {
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
+            document.getElementById(`view-${viewName}`).classList.add('active-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function renderCatalog() {
+            catalogGrid.innerHTML = '';
+            const filtered = buildCatalog.filter(item => {
+                const matchesCat = currentCategory === 'ALL' || item.category === currentCategory;
+                const matchesSrc = item.name.toLowerCase().includes(searchQuery) || item.description.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSrc;
+            });
+            if (filtered.length === 0) {
+                catalogGrid.innerHTML = '<div style="text-align:center; padding:20px; color:#718096; font-style:italic;">No builds found matching this filter.</div>';
+                return;
+            }
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'build-card';
+                card.innerHTML = `
+                    <div class="card-content">
+                        <span class="card-tag">${item.category}</span>
+                        <h3 class="card-title">${item.name.toUpperCase()}</h3>
+                        <p class="card-desc">${item.description}</p>
+                        <button class="btn-card-order" onclick="selectBuildForOrder('${item.name}', '${item.category}')">ORDER THIS</button>
+                    </div>
+                `;
+                catalogGrid.appendChild(card);
+            });
+        }
+
+        window.selectBuildForOrder = function(buildName, category) {
+            if (category === 'DIGGING') serviceTypeSelect.value = "Digging Service";
+            else if (category === 'FARM') serviceTypeSelect.value = "Farm Build";
+            else if (category === 'STASH') serviceTypeSelect.value = "Stash Build";
+            else if (category === 'REGEAR') serviceTypeSelect.value = "Regear Setup";
+            
+            activelySelectedBuildName = buildName;
+            selectedBuildTitle.textContent = buildName.toUpperCase();
+            selectionCard.style.display = "flex";
+            toggleCalculator();
+            document.getElementById('order-form').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.clearSelectedBuild = function() {
+            activelySelectedBuildName = "";
+            selectionCard.style.display = "none";
+            toggleCalculator();
+        };
+
+        function toggleCalculator() {
+            if (serviceTypeSelect.value === "Digging Service") {
+                diggingCalcBox.style.display = "block";
+                updatePrice();
+            } else {
+                diggingCalcBox.style.display = "none";
+            }
+        }
+        function updatePrice() {
+            const l = parseInt(document.getElementById('calc-length').value) || 0;
+            const w = parseInt(document.getElementById('calc-width').value) || 0;
+            const h = parseInt(document.getElementById('calc-height').value) || 0;
+            const total = l * w * h;
+            document.getElementById('calc-result').textContent = `Total Blocks: ${total.toLocaleString()} | Price: ${(total * 130).toLocaleString()}`;
+        }
+        document.getElementById('calc-length').addEventListener('input', updatePrice);
+        document.getElementById('calc-width').addEventListener('input', updatePrice);
+        document.getElementById('calc-height').addEventListener('input', updatePrice);
+
+        window.handleSearch = function() { searchQuery = searchInput.value.toLowerCase().trim(); renderCatalog(); };
+        window.filterCategory = function(cat, element) {
+            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            currentCategory = cat;
+            renderCatalog();
+        };
+
+        document.getElementById('order-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const discUser = document.getElementById('discord-user').value;
+            const mcUser = document.getElementById('mc-user').value;
+            const selectedType = serviceTypeSelect.value;
+            let finalName = activelySelectedBuildName !== "" ? activelySelectedBuildName : `Custom ${selectedType}`;
+            let detailsInfo = document.getElementById('order-details').value;
+            
+            if (selectedType === "Digging Service") {
+                const l = document.getElementById('calc-length').value;
+                const w = document.getElementById('calc-width').value;
+                const h = document.getElementById('calc-height').value;
+                detailsInfo += ` [Dimensions: ${l}x${w}x${h} | ${document.getElementById('calc-result').textContent}]`;
+            }
+
+            const newOrder = {
+                id: Date.now(),
+                user: discUser + ` (${mcUser})`,
+                type: finalName,
+                details: detailsInfo,
+                status: "Pending"
+            };
+            databaseOrders.push(newOrder);
+            
+            let summary = `Order Submitted! Added to Database.\n\nSummary:\nUser: ${newOrder.user}\nService: ${newOrder.type}\nDetails: ${newOrder.details}`;
+            alert(summary);
+            
+            document.getElementById('order-form').reset();
+            clearSelectedBuild();
+            renderAdminDashboard();
+        });
+
+        window.toggleAuthMode = function() {
+            const title = document.getElementById('auth-panel-title');
+            const desc = document.getElementById('auth-panel-desc');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleLink = document.getElementById('auth-toggle-link');
+
+            if(authMode === "login") {
+                authMode = "signup";
+                title.textContent = "CREATE NEW ACCOUNT";
+                desc.textContent = "Register global build service credentials below.";
+                submitBtn.textContent = "REGISTER";
+                toggleText.textContent = "Already have an account?";
+                toggleLink.textContent = "Login";
+            } else {
+                authMode = "login";
+                title.textContent = "ACCOUNT LOGIN";
+                desc.textContent = "Sign in to sync your builds. Admin access accounts: use your administrative credentials.";
+                submitBtn.textContent = "SIGN IN";
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = "Register";
+            }
+        };
+
+        window.handleAuthNavClick = function() {
+            if(loggedInUser) {
+                loggedInUser = null;
+                document.getElementById('nav-auth-btn').textContent = "Login";
+                document.getElementById('nav-admin-btn').style.display = "none";
+                alert("You have logged out successfully.");
+                switchView('showcase');
+            } else {
+                switchView('auth');
+            }
+        };
+
+        window.executeAuthAction = function(e) {
+            e.preventDefault();
+            const emailValue = document.getElementById('auth-email').value.trim().toLowerCase();
+            
+            loggedInUser = {
+                email: emailValue,
+                role: emailValue === 'admin@donut.smp' ? 'admin' : 'player'
+            };
+
+            document.getElementById('nav-auth-btn').textContent = "Logout";
+            document.getElementById('auth-form').reset();
+
+            if (loggedInUser.role === 'admin') {
+                document.getElementById('nav-admin-btn').style.display = "flex";
+                alert("Logged in as Admin. Access Panel unlocked!");
+                renderAdminDashboard();
+                switchView('admin');
+            } else {
+                alert(`Welcome back, client user!`);
+                switchView('showcase');
+            }
+        };
+
+        function renderAdminDashboard() {
+            const container = document.getElementById('admin-orders-list');
+            container.innerHTML = '';
+
+            if (databaseOrders.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#718096;">Zero active tickets found.</div>';
+                return;
+            }
+
+            databaseOrders.forEach(order => {
+                const statusClass = order.status === 'Pending' ? 'status-p' : 'status-c';
+                const card = document.createElement('div');
+                card.className = 'admin-order-card';
+                card.innerHTML = `
+                    <div class="admin-order-header">
+                        <span class="admin-order-user">${order.user}</span>
+                        <span class="admin-order-status ${statusClass}">${order.status}</span>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--accent-gold); margin-bottom: 4px; font-weight:600;">${order.type.toUpperCase()}</div>
+                    <div style="font-size:0.85rem; color:var(--text-main); line-height:1.4;">${order.details}</div>
+                    <div class="admin-actions">
+                        ${order.status === 'Pending' ? `<button class="btn-admin-action complete-btn" onclick="updateOrderStatus(${order.id}, 'Completed')">Mark Done</button>` : ''}
+                        <button class="btn-admin-action" onclick="deleteOrderTicket(${order.id})" style="color:#b84e36; border-color: rgba(184, 78, 54, 0.4)">Remove</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.updateOrderStatus = function(orderId, nextStatus) {
+            const order = databaseOrders.find(o => o.id === orderId);
+            if (order) order.status = nextStatus;
+            renderAdminDashboard();
+        };
+
+        window.deleteOrderTicket = function(orderId) {
+            databaseOrders = databaseOrders.filter(o => o.id !== orderId);
+            renderAdminDashboard();
+        };
+
+        const modalOverlay = document.getElementById('how-it-works-modal');
+        window.openModal = function() { modalOverlay.style.display = "flex"; };
+        window.closeModal = function() {
+            if (document.getElementById('dont-show-again').checked) {
+                localStorage.setItem('hideHowItWorksPopup', 'true');
+            }
+            modalOverlay.style.display = "none";
+        };
+        
+        function checkFirstTimeVisit() {
+            if (!localStorage.getItem('hideHowItWorksPopup')) openModal();
+        }
+
+        renderCatalog();
+        checkFirstTimeVisit();
+    </script>
+</body>
+</html>
