@@ -3,185 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donut SMP - Builder Service</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap');
-
-        :root {
-            --bg-dark: #0d0e11;       
-            --card-dark: #1a171e;     
-            --input-bg: #121014;      
-            --text-main: #b0b5c1;     
-            --text-light: #e2e8f0;    
-            --accent-ember: #b84e36;  
-            --accent-gold: #d1a751;   
-            --accent-blue: #4b6b7c;   
-            --border-color: #26232b;  
-            --status-pending: #d1a751;
-            --status-completed: #72b043;
-            --yt-red: #ff0000;
-            --discord-blurple: #5865f2;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .wrapper { width: 100%; max-width: 600px; }
-        header { text-align: center; margin-top: 20px; margin-bottom: 40px; }
-        .brand-sub { color: var(--accent-ember); font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 3px; margin-bottom: 10px; }
-        .status-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(75, 107, 124, 0.1); border: 1px solid var(--accent-blue); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; color: var(--text-light); margin-bottom: 20px; }
-        .status-dot { width: 8px; height: 8px; background-color: #72b043; border-radius: 50%; }
-        h1 { color: var(--accent-gold); font-family: 'Cinzel', serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; letter-spacing: 1px; }
-        .tagline { font-style: italic; color: #718096; font-size: 0.95rem; }
-        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 40px; }
-        .nav-btn { background: transparent; border: 1px solid var(--accent-blue); color: var(--text-light); padding: 10px 4px; border-radius: 25px; text-align: center; text-decoration: none; font-size: 0.8rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .nav-btn.admin-only { border-color: var(--accent-gold); color: var(--accent-gold); display: none; }
-        .view-panel { display: none; }
-        .view-panel.active-view { display: block; }
-        .section-title { color: var(--text-light); font-family: 'Cinzel', serif; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .section-title::before { content: "◆"; color: var(--accent-ember); font-size: 0.9rem; }
-        .section-desc { font-size: 0.9rem; color: #718096; margin-bottom: 20px; line-height: 1.5; }
-        .search-container { display: flex; gap: 10px; margin-bottom: 25px; }
-        .search-bar { flex: 1; background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: var(--text-light); }
-        .btn-search { background: var(--accent-ember); color: var(--text-light); border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .categories-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
-        .cat-chip { background: rgba(26, 23, 30, 0.6); border: 1px solid var(--border-color); color: #718096; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
-        .cat-chip.active { background: var(--accent-ember); color: var(--text-light); border-color: var(--accent-ember); }
-        .build-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 20px; padding: 20px; }
-        .card-tag { color: var(--accent-ember); font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 5px; font-weight: 600; }
-        .card-title { color: var(--text-light); font-family: 'Cinzel', serif; margin-bottom: 10px; }
-        .btn-card-order { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .form-panel { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; margin-bottom: 40px; }
-        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
-        label { font-size: 0.75rem; color: #718096; margin-bottom: 8px; font-weight: 600; }
-        input, textarea, select { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: var(--text-light); }
-        .btn-submit { width: 100%; background: var(--accent-ember); color: var(--text-light); border: none; padding: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        .admin-order-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 15px; }
-        .status-p { color: var(--accent-gold); }
-        .status-c { color: var(--status-completed); }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .modal-card { background: var(--card-dark); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 400px; padding: 30px; text-align: center; }
-    </style>
+    <title>Donut SMP Builder Service</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- MODAL -->
-    <div class="modal-overlay" id="how-it-works-modal">
-        <div class="modal-card">
-            <h2 style="color:var(--accent-gold); margin-bottom:20px;">HOW IT WORKS</h2>
-            <p style="margin-bottom:20px; font-size:0.9rem;">1. Browse builds <br> 2. Submit form <br> 3. Get Discord update</p>
-            <button class="btn-submit" onclick="closeModal()">GOT IT</button>
+    <!-- HERO HEADER SECTION -->
+    <header class="hero-section">
+        <div class="brand-top">DONUT SMP &bull; BUILDER SERVICE</div>
+        
+        <div class="status-badge">
+            <span class="status-dot"></span> Orders Open &mdash; Team Online
         </div>
-    </div>
 
-    <div class="wrapper">
-        <header>
-            <div class="brand-sub">DONUT SMP • BUILDER SERVICE</div>
-            <h1>OUR WORK & SERVICE</h1>
-        </header>
+        <h1>OUR WORK &<br>ORDER FORM</h1>
+        <p class="hero-subtitle">See what we build. Tell us what you need.</p>
 
-        <nav class="nav-grid">
-            <button class="nav-btn" onclick="switchView('showcase')">Showcase</button>
-            <button class="nav-btn" id="nav-auth-btn" onclick="handleAuthNavClick()">Login</button>
-            <button class="nav-btn admin-only" id="nav-admin-btn" onclick="switchView('admin')">Admin UI</button>
-            <button class="nav-btn" onclick="openModal()">Guide</button>
-        </nav>
+        <div class="quick-nav-grid">
+            <button class="nav-pill">ℹ️ How It Works</button>
+            <button class="nav-pill">📋 My Orders</button>
+            <button class="nav-pill">🔗 Share</button>
+            <button class="nav-pill">🔑 Account</button>
+        </div>
+    </header>
 
-        <!-- VIEW: SHOWCASE -->
-        <div id="view-showcase" class="view-panel active-view">
-            <div id="catalog-grid"></div>
-            <div class="form-panel">
-                <h2 class="section-title">ORDER FORM</h2>
-                <form id="order-form">
-                    <div class="form-group"><label>DISCORD</label><input type="text" id="discord-user" required></div>
-                    <div class="form-group"><label>SERVICE</label><select id="service-type"><option>Stash Build</option><option>Digging Service</option></select></div>
-                    <div class="form-group"><label>DETAILS</label><textarea id="order-details" rows="3"></textarea></div>
-                    <button type="submit" class="btn-submit">SUBMIT ORDER</button>
-                </form>
+    <!-- SHOWCASE & SEARCH SECTION -->
+    <section class="showcase-section">
+        <div class="section-title">
+            <span class="diamond">◆</span> SHOWCASE
+        </div>
+        <p class="section-subtitle">Tap a category to filter, or tap any tile to jump straight to the order form for that service.</p>
+
+        <div class="search-bar-container">
+            <input type="text" placeholder="Search builds &mdash; e.g. kelp farm," class="search-input">
+            <button class="search-btn">SEARCH</button>
+        </div>
+    </section>
+
+    <!-- CATEGORIES FILTER -->
+    <section class="categories-section">
+        <div class="filter-container">
+            <span class="filter-icon"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg> Categories</span>
+            <div class="category-buttons">
+                <button class="cat-btn active">ALL</button>
+                <button class="cat-btn">STASH</button>
+                <button class="cat-btn">REGEAR</button>
+                <button class="cat-btn">FARM</button>
+                <button class="cat-btn">DIGGING</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTFOLIO SECTION -->
+    <section class="portfolio-section">
+        <div class="portfolio-card">
+            <img src="images/black-white-stash.jpg" alt="Black and White Stash" class="card-image">
+            <div class="card-content">
+                <span class="tag">STASH</span>
+                <h2>Black and White Stash</h2>
+                <p>Sleek monochrome storage ball with organized chest rows</p>
+                <div class="card-actions">
+                    <button class="btn-outline">VIEW</button>
+                    <button class="btn-solid" onclick="document.getElementById('order').scrollIntoView({behavior: 'smooth'});">ORDER THIS</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORDER FORM SECTION -->
+    <section class="order-section" id="order">
+        <div class="section-title">
+            <span class="diamond">◆</span> ORDER FORM
+        </div>
+        <p class="section-subtitle">Fill this out, then copy the summary and paste it into your ticket channel.</p>
+
+        <form class="order-form" id="builderForm">
+            <div class="form-group">
+                <label>DISCORD USERNAME</label>
+                <input type="text" id="discordUser" placeholder="e.g. shadowfang#0001" required>
+            </div>
+
+            <div class="form-group">
+                <label>MINECRAFT USERNAME</label>
+                <input type="text" id="mcUser" placeholder="e.g. ShadowFang_MC" required>
+            </div>
+
+            <div class="form-group">
+                <label>DISCORD ID (OPTIONAL &mdash; LETS US GIVE YOU A PRIVATE ORDER CHANNEL)</label>
+                <input type="text" placeholder="e.g. 1234567890123456789">
+                <small class="form-hint">Don't know your ID? In Discord: Settings &rarr; Advanced &rarr; turn on <strong>Developer Mode</strong>. Then long-press your name anywhere &rarr; <strong>Copy User ID</strong> &rarr; paste it here.</small>
+            </div>
+
+            <div class="form-group">
+                <label>SERVICE TYPE</label>
+                <select id="serviceType">
+                    <option>Stash Build</option>
+                    <option>Regear Setup</option>
+                    <option>Farm Build</option>
+                    <option selected>Digging / Excavation</option>
+                </select>
+            </div>
+
+            <!-- DIGGING SPECIFIC DIMENSIONS PANEL (Properly Contained) -->
+            <div class="digging-options-panel" id="diggingPanel">
+                <div class="form-group">
+                    <label style="color: #dfba73;">DIGGING DIMENSIONS (BLOCKS)</label>
+                    <div class="dimension-inputs-grid">
+                        <input type="number" id="digLength" placeholder="Length" min="0">
+                        <input type="number" id="digWidth" placeholder="Width" min="0">
+                        <input type="number" id="digHeight" placeholder="Height" min="0">
+                    </div>
+                </div>
+                
+                <div class="calculation-summary-box">
+                    <p>Total Blocks: <strong id="totalBlocks" style="color: #fff;">0</strong></p>
+                    <p>Per Block Cost: <strong style="color: #fff;">150 money</strong></p>
+                    <p>Estimated Total Price: <strong id="totalCost" style="color: var(--accent);">0 money</strong></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>DETAILS & REQUESTS</label>
+                <textarea id="orderDetails" rows="4" placeholder="Describe what you want built, style, materials, deadline, etc."></textarea>
+            </div>
+
+            <button type="submit" class="submit-order-btn">SUBMIT ORDER</button>
+            
+            <div class="backup-copy-box">
+                <label>BACKUP COPY (IN CASE AUTO-SEND FAILS)</label>
+                <div class="copy-output-box" id="summaryOutput">Your formatted order summary will appear here...</div>
+                <button type="button" class="btn-outline" id="copyClipBtn">COPY TO CLIPBOARD</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq-section">
+        <div class="section-title">
+            <span class="diamond">◆</span> FAQ
+        </div>
+        <p class="section-subtitle">Quick answers before you order.</p>
+
+        <div class="faq-accordion">
+            <div class="faq-item">
+                <button class="faq-question">What currency do you accept? <span class="faq-icon">+</span></button>
+                <div class="faq-answer">
+                    <p>In-game Money on Donut SMP &mdash; not diamonds or real currency. Send via /pay once your order is confirmed.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">How long does delivery take? <span class="faq-icon">+</span></button>
+                <div class="faq-answer">
+                    <p>We typically respond within 1&ndash;2 hours of your order. Actual delivery time depends on the job size &mdash; small stashes and regears are usually same-day, larger digs/farms may take longer.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">What if I'm not satisfied? <span class="faq-icon">+</span></button>
+                <div class="faq-answer">
+                    <p>Message us in Discord and we'll work with you to fix it. Let us know exactly what's wrong so we can make it right.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">Do I need to pay upfront? <span class="faq-icon">+</span></button>
+                <div class="faq-answer">
+                    <p>We'll confirm the price and payment details with you directly in Discord after you submit your order &mdash; nothing is charged automatically from this site.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER / PARTNERS -->
+    <footer>
+        <div class="section-title">
+            <span class="diamond">◆</span> OUR PARTNERS
+        </div>
+        <p class="section-subtitle">Servers and creators we work with.</p>
+
+        <div class="partner-card">
+            <h3>AshKeleton</h3>
+            <div class="partner-actions">
+                <a href="#" class="btn-outline">Discord</a>
+                <a href="#" class="btn-outline">YouTube</a>
             </div>
         </div>
 
-        <!-- VIEW: AUTH -->
-        <div id="view-auth" class="view-panel">
-            <h2 class="section-title">LOGIN</h2>
-            <div class="form-panel">
-                <form id="auth-form" onsubmit="executeAuthAction(event)">
-                    <div class="form-group"><label>EMAIL</label><input type="email" id="auth-email" required></div>
-                    <div class="form-group"><label>PASS</label><input type="password" id="auth-pass" required></div>
-                    <button type="submit" class="btn-submit">SIGN IN</button>
-                </form>
-            </div>
+        <div class="footer-links">
+            <a href="#" class="btn-outline">YouTube</a>
+            <a href="#" class="btn-solid-dark">Join our Discord</a>
+            <a href="#" class="btn-outline">Copy Invite Link</a>
         </div>
+        
+        <p class="footer-branding">DONUT SMP BUILDER SERVICE</p>
+    </footer>
 
-        <!-- VIEW: ADMIN -->
-        <div id="view-admin" class="view-panel">
-            <h2 class="section-title">ADMIN PANEL</h2>
-            <div id="admin-orders-list"></div>
-        </div>
-    </div>
-
-    <script>
-        let buildCatalog = [{name: "Mega Gold Farm", category: "FARM", description: "High efficiency."}, {name: "Vault", category: "STASH", description: "Obsidian room."}];
-        let databaseOrders = [{id: 1, user: "Player1", type: "Vault", status: "Pending"}];
-        let loggedInUser = null;
-
-        function switchView(view) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
-            document.getElementById(`view-${view}`).classList.add('active-view');
-        }
-
-        function renderCatalog() {
-            const grid = document.getElementById('catalog-grid');
-            grid.innerHTML = buildCatalog.map(item => `
-                <div class="build-card">
-                    <span class="card-tag">${item.category}</span>
-                    <h3 class="card-title">${item.name}</h3>
-                    <p>${item.description}</p>
-                    <button class="btn-card-order" onclick="switchView('showcase')">ORDER</button>
-                </div>
-            `).join('');
-        }
-
-        function renderAdminDashboard() {
-            const container = document.getElementById('admin-orders-list');
-            container.innerHTML = databaseOrders.map(order => `
-                <div class="admin-order-card">
-                    <div><strong>${order.user}</strong> - ${order.status}</div>
-                    <button onclick="completeOrder(${order.id})">Mark Complete</button>
-                </div>
-            `).join('');
-        }
-
-        window.completeOrder = (id) => {
-            databaseOrders = databaseOrders.map(o => o.id === id ? {...o, status: 'Completed'} : o);
-            renderAdminDashboard();
-        };
-
-        window.executeAuthAction = (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            loggedInUser = { role: email === 'admin@donut.smp' ? 'admin' : 'player' };
-            if(loggedInUser.role === 'admin') document.getElementById('nav-admin-btn').style.display = "flex";
-            alert("Logged in!");
-            switchView('showcase');
-        };
-
-        window.handleAuthNavClick = () => {
-            if(loggedInUser) { loggedInUser = null; alert("Logged out."); location.reload(); }
-            else switchView('auth');
-        };
-
-        window.openModal = () => document.getElementById('how-it-works-modal').style.display = "flex";
-        window.closeModal = () => document.getElementById('how-it-works-modal').style.display = "none";
-
-        document.getElementById('order-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert("Order Submitted!");
-            databaseOrders.push({id: Date.now(), user: document.getElementById('discord-user').value, status: 'Pending'});
-            renderAdminDashboard();
-        });
-
-        renderCatalog();
-        renderAdminDashboard();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
